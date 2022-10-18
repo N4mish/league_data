@@ -1,4 +1,4 @@
-import requests
+import requests, pymongo
 
 def requestSummonerData(region, summonerName, APIKey):
     URL = "https://" + region + ".api.riotgames.com/lol/summoner/v4/summoners/by-name/" + summonerName + "?api_key=" + APIKey
@@ -6,7 +6,7 @@ def requestSummonerData(region, summonerName, APIKey):
     return response.json()
 
 def getMatchHistory(region, puuid, APIKey):
-    URL = "https://" + region + ".api.riotgames.com/lol/match/v5/matches/by-puuid/" + puuid + "/ids" + "?api_key=" + APIKey
+    URL = "https://" + region + ".api.riotgames.com/lol/match/v5/matches/by-puuid/" + puuid + "/ids" + "?api_key=" + APIKey + "&count=100"
     return requests.get(URL).json()
     
 def getMatch(region, matchID, APIKey):
@@ -15,10 +15,16 @@ def getMatch(region, matchID, APIKey):
 
 def main():
     print("Regions: 'BR1 EUN1 EUW1 JP1 KR LA1 LA2 NA1 OC1 RU TR1'\n")
-    region = input('Enter Region: ')
-    summonerName = input('Enter Summoner Name: ')
-    APIKey = input('Enter your API Key: ')
+    # region = input('Enter Region: ')
+    # summonerName = input('Enter Summoner Name: ')
+    # APIKey = input('Enter your API Key: ')
+    region = "NA1"
+    summonerName = "a snowy night"
+    APIKey = "RGAPI-9d87323c-0793-49d0-9a7d-ba6bfeaa3a2d"
     responseJSON = requestSummonerData(region, summonerName, APIKey)
+    client = pymongo.MongoClient("mongodb://localhost:27017/")
+    aram = client.LeagueData.ARAM
+    ranked = client.LeagueData.Ranked
 
     # print("\nId: ", responseJSON['id'])
     # print("Account Id: ", responseJSON['accountId'])
@@ -29,17 +35,15 @@ def main():
     print("Summoner Level : ", responseJSON['summonerLevel'])
 
     matchHistory = getMatchHistory("AMERICAS", responseJSON['puuid'], APIKey)
-    deathsMoreThanTen = 0
-    matches = {}
-    for i in range(0, 10):
-        matches[i] = getMatch("AMERICAS", matchHistory[i], APIKey)
+    count = 0
+    for i in range(0, 100):
+        match = getMatch("AMERICAS", matchHistory[i], APIKey)
         
+        if match['info']['gameMode'] == 'ARAM':
+            aram.insert_one(match)
+            count += 1
 
-    for i in range(0, 10):
-        if matches[i]["info"]["participants"][0]["deaths"] >= 5:
-            deathsMoreThanTen += 1
-
-    print("Int counter: " + str((deathsMoreThanTen/10)*100) + "%")
+    print(count)
 
 
 
