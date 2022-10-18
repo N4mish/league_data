@@ -20,7 +20,7 @@ def main():
     # APIKey = input('Enter your API Key: ')
     region = "NA1"
     summonerName = "a snowy night"
-    APIKey = "RGAPI-9d87323c-0793-49d0-9a7d-ba6bfeaa3a2d"
+    APIKey = ""
     responseJSON = requestSummonerData(region, summonerName, APIKey)
     client = pymongo.MongoClient("mongodb://localhost:27017/")
     aram = client.LeagueData.ARAM
