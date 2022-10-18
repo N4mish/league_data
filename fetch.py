@@ -19,12 +19,13 @@ def main():
     # summonerName = input('Enter Summoner Name: ')
     # APIKey = input('Enter your API Key: ')
     region = "NA1"
-    summonerName = "a snowy night"
+    summonerName = "morivilance"
     APIKey = ""
     responseJSON = requestSummonerData(region, summonerName, APIKey)
     client = pymongo.MongoClient("mongodb://localhost:27017/")
     aram = client.LeagueData.ARAM
     ranked = client.LeagueData.Ranked
+    rift = client.LeagueData.SummonersRift
 
     # print("\nId: ", responseJSON['id'])
     # print("Account Id: ", responseJSON['accountId'])
@@ -36,11 +37,11 @@ def main():
 
     matchHistory = getMatchHistory("AMERICAS", responseJSON['puuid'], APIKey)
     count = 0
-    for i in range(0, 100):
+    for i in range(0, 99):
         match = getMatch("AMERICAS", matchHistory[i], APIKey)
         
-        if match['info']['gameMode'] == 'ARAM':
-            aram.insert_one(match)
+        if match['info']['gameMode'] == 'CLASSIC':
+            rift.insert_one(match)
             count += 1
 
     print(count)
