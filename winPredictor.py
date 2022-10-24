@@ -24,7 +24,7 @@ def readFile():
 
 def preprocess(champs):
     client = pymongo.MongoClient("mongodb://localhost:27017/")
-    rift = client.LeagueData.SummonersRift
+    rift = client.LeagueData.newChallenger
     top = []
     jungle = []
     mid = []
@@ -49,8 +49,8 @@ def preprocess(champs):
         bot.append(champs[match['info']['participants'][8]['championName']])
         support.append(champs[match['info']['participants'][9]['championName']])
         #updated gd15
-        if len(match['timeline']['info']['frames']) >= 20:
-            frames = match['timeline']['info']['frames'][20]['participantFrames']
+        if len(match['timeline']['info']['frames']) > 15:
+            frames = match['timeline']['info']['frames'][15]['participantFrames']
             team1Gold = 0;
             team2Gold = 0;
             for i in range(1, 6):
@@ -61,9 +61,9 @@ def preprocess(champs):
         gd15.append(team2Gold-team1Gold)
         winCol.append(1 if win1 else 0)
         winCol.append(1 if win2 else 0)
-    #return pd.DataFrame(data={'top': top, 'jungle': jungle, 'mid': mid, 'bot': bot, 'support': 
-    #    support, 'goldDiff': gd15, 'win': winCol})
-    return pd.DataFrame(data={'gd': gd15, 'win': winCol})
+    return pd.DataFrame(data={'top': top, 'jungle': jungle, 'mid': mid, 'bot': bot, 'support': 
+        support, 'goldDiff': gd15, 'win': winCol})
+    # return pd.DataFrame(data={'gd': gd15, 'win': winCol})
 
     ## test data    
 class TestData(Dataset):
@@ -93,7 +93,7 @@ class BinaryClassification(nn.Module):
     def __init__(self):
         super(BinaryClassification, self).__init__()
         # Number of input features is 12.
-        self.layer_1 = nn.Linear(1, 64) 
+        self.layer_1 = nn.Linear(6, 64) 
         self.layer_2 = nn.Linear(64, 64)
         self.layer_out = nn.Linear(64, 1) 
         
