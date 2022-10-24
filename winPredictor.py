@@ -25,32 +25,33 @@ def readFile():
 def preprocess(champs):
     client = pymongo.MongoClient("mongodb://localhost:27017/")
     rift = client.LeagueData.newChallenger
-    top = []
-    jungle = []
-    mid = []
-    bot = []
-    support = []
-    gd15 = []
-    winCol = []
+
     totalMatches = 0
+    """
+    normal gold difference
+    first blood
+    first herald/first dragon
+    first tower
+    first baron
+    """
+    gd15 = []
+    firstBlood = []
+    firstHerald = []
+    firstDragon = []
+    firstTower = []
+    firstBaron = []
+
+    winCol = []
     for match in rift.find({}):
         totalMatches += 1
         win1 = True if match['info']['teams'][0]['win'] == True else False
         win2 = not win1
-        curChamps = []
-        top.append(champs[match['info']['participants'][0]['championName']])
-        jungle.append(champs[match['info']['participants'][1]['championName']])
-        mid.append(champs[match['info']['participants'][2]['championName']])
-        bot.append(champs[match['info']['participants'][3]['championName']])
-        support.append(champs[match['info']['participants'][4]['championName']])
-        top.append(champs[match['info']['participants'][5]['championName']])
-        jungle.append(champs[match['info']['participants'][6]['championName']])
-        mid.append(champs[match['info']['participants'][7]['championName']])
-        bot.append(champs[match['info']['participants'][8]['championName']])
-        support.append(champs[match['info']['participants'][9]['championName']])
         #updated gd15
-        if len(match['timeline']['info']['frames']) > 15:
-            frames = match['timeline']['info']['frames'][15]['participantFrames']
+        match15 = match['timeline']['info']['frames']
+
+        # Gold Difference @ 15
+        if len(match15) > 15:
+            frames = match15[15]['participantFrames']
             team1Gold = 0;
             team2Gold = 0;
             for i in range(1, 6):
@@ -59,11 +60,38 @@ def preprocess(champs):
                 team2Gold += frames[str(i)]['totalGold'];
         gd15.append(team1Gold-team2Gold)
         gd15.append(team2Gold-team1Gold)
+
+        # stores the current first boolean variable
+        currentFirst = match['info']['teams'][0]['objectives']['champion']['first'] 
+        # First Blood
+        firstBlood.append(1 if currentFirst else 0) 
+        firstBlood.append(1 if not currentFirst else 0) 
+
+        # First Herald
+        currentFirst = match['info']['teams'][0]['objectives']['riftHerald']['first']        
+        firstHerald.append(1 if currentFirst else 0) 
+        firstHerald.append(1 if not currentFirst else 0) 
+
+        # First Dragon
+        currentFirst = match['info']['teams'][0]['objectives']['dragon']['first']         
+        firstDragon.append(1 if currentFirst else 0) 
+        firstDragon.append(1 if not currentFirst else 0) 
+
+        # First Tower
+        currentFirst = match['info']['teams'][0]['objectives']['tower']['first']          
+        firstTower.append(1 if currentFirst else 0) 
+        firstTower.append(1 if not currentFirst else 0) 
+
+        # First Baron
+        currentFirst = match['info']['teams'][0]['objectives']['baron']['first']        
+        firstBaron.append(1 if currentFirst else 0) 
+        firstBaron.append(1 if not currentFirst else 0) 
+
+        # Won or not
         winCol.append(1 if win1 else 0)
         winCol.append(1 if win2 else 0)
-    return pd.DataFrame(data={'top': top, 'jungle': jungle, 'mid': mid, 'bot': bot, 'support': 
-        support, 'goldDiff': gd15, 'win': winCol})
-    # return pd.DataFrame(data={'gd': gd15, 'win': winCol})
+    return pd.DataFrame(data={'gd': gd15, 'fb': firstBlood, 'fd': firstDragon, 'fh': firstHerald,
+         'ft': firstTower, 'fba': firstBaron, 'win': winCol})
 
     ## test data    
 class TestData(Dataset):
@@ -169,7 +197,9 @@ def main():
             epoch_loss += loss.item()
             epoch_acc += acc.item()
             print(f'Epoch {e+0:03}: | Loss: {epoch_loss/len(train_loader):.5f} | Acc: {epoch_acc/len(train_loader):.3f}')
-    # torch.save(model.state_dict(), "/Users/namishkukreja/VSCode/league_data/model.pt")            
+    # WINDOWS_PATH = "C:\Users\Administrator\Documents\VSCode\league_data"
+    MAC_PATH = "/Users/namishkukreja/VSCode/league_data/model.pt"
+    torch.save(model.state_dict(), "model.pt")            
     y_pred_list = []
 
     model.eval()
@@ -196,3 +226,27 @@ def binary_acc(y_pred, y_test):
 
 if __name__ == "__main__":
     main()
+
+
+
+"""
+dead code
+in preprocess:
+    top = []
+    jungle = []
+    mid = []
+    bot = []
+    support = []
+    top.append(champs[match['info']['participants'][0]['championName']])
+    jungle.append(champs[match['info']['participants'][1]['championName']])
+    mid.append(champs[match['info']['participants'][2]['championName']])
+    bot.append(champs[match['info']['participants'][3]['championName']])
+    support.append(champs[match['info']['participants'][4]['championName']])
+    top.append(champs[match['info']['participants'][5]['championName']])
+    jungle.append(champs[match['info']['participants'][6]['championName']])
+    mid.append(champs[match['info']['participants'][7]['championName']])
+    bot.append(champs[match['info']['participants'][8]['championName']])
+    support.append(champs[match['info']['participants'][9]['championName']])
+    return pd.DataFrame(data={'top': top, 'jungle': jungle, 'mid': mid, 'bot': bot, 'support': 
+            support, 'goldDiff': gd15, 'win': winCol})
+"""

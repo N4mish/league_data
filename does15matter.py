@@ -3,9 +3,10 @@ import pymongo
 counter = 0;
 totalMatches = 0;
 client = pymongo.MongoClient("mongodb://localhost:27017/")
-rift = client.LeagueData.SummonersRift
+rift = client.LeagueData.newChallenger
 team = 0
 bigdcounter = 0
+i = 0
 for match in rift.find({}):
     totalMatches += 1
     win1 = True if match['info']['teams'][0]['win'] == True else False
