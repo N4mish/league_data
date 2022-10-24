@@ -2,7 +2,7 @@ import pymongo
 
 champions = {}
 client = pymongo.MongoClient("mongodb://localhost:27017/")
-rift = client.LeagueData.SummonersRift
+rift = client.LeagueData.challenger
 team = 0
 bigdcounter = 0
 for match in rift.find({}):
