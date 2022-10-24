@@ -94,7 +94,7 @@ def main():
     # print("Summoner Level : ", responseJSON['summonerLevel'])
     region = "NA1"
     summonerName = "Tanukí"
-    APIKey = "RGAPI-099ea06e-e6b5-4949-a650-6efb27a8fb6a"
+    APIKey = ""
     responseJSON = requestSummonerData(region, summonerName, APIKey)
     client = pymongo.MongoClient("mongodb://localhost:27017/")
 
