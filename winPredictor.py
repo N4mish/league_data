@@ -40,6 +40,7 @@ def preprocess(champs):
     firstDragon = []
     firstTower = []
     firstBaron = []
+    gameDuration = []
 
     winCol = []
     for match in rift.find({}):
@@ -47,11 +48,11 @@ def preprocess(champs):
         win1 = True if match['info']['teams'][0]['win'] == True else False
         win2 = not win1
         #updated gd15
-        match15 = match['timeline']['info']['frames']
+        matchFrames = match['timeline']['info']['frames']
 
         # Gold Difference @ 15
-        if len(match15) > 15:
-            frames = match15[15]['participantFrames']
+        if len(matchFrames) > 15:
+            frames = matchFrames[15]['participantFrames']
             team1Gold = 0;
             team2Gold = 0;
             for i in range(1, 6):
@@ -87,11 +88,15 @@ def preprocess(champs):
         firstBaron.append(1 if currentFirst else 0) 
         firstBaron.append(1 if not currentFirst else 0) 
 
+        # Game duration
+        gameDuration.append(len(matchFrames))
+        gameDuration.append(len(matchFrames))
         # Won or not
         winCol.append(1 if win1 else 0)
         winCol.append(1 if win2 else 0)
-    return pd.DataFrame(data={'gd': gd15, 'fb': firstBlood, 'fd': firstDragon, 'fh': firstHerald,
-         'ft': firstTower, 'fba': firstBaron, 'win': winCol})
+    return pd.DataFrame(data={'gd': gd15,'fd': firstDragon,'fba': firstBaron, 'dur': gameDuration, 'win': winCol})
+    #return pd.DataFrame(data={'gd': gd15, 'fb': firstBlood, 'fd': firstDragon, 'fh': firstHerald,
+    #     'ft': firstTower, 'fba': firstBaron, 'dur': gameDuration, 'win': winCol})
 
     ## test data    
 class TestData(Dataset):
@@ -121,7 +126,7 @@ class BinaryClassification(nn.Module):
     def __init__(self):
         super(BinaryClassification, self).__init__()
         # Number of input features is 12.
-        self.layer_1 = nn.Linear(6, 64) 
+        self.layer_1 = nn.Linear(4, 64) 
         self.layer_2 = nn.Linear(64, 64)
         self.layer_out = nn.Linear(64, 1) 
         
@@ -199,7 +204,7 @@ def main():
             print(f'Epoch {e+0:03}: | Loss: {epoch_loss/len(train_loader):.5f} | Acc: {epoch_acc/len(train_loader):.3f}')
     # WINDOWS_PATH = "C:\Users\Administrator\Documents\VSCode\league_data"
     MAC_PATH = "/Users/namishkukreja/VSCode/league_data/model.pt"
-    torch.save(model.state_dict(), "model.pt")            
+    # torch.save(model.state_dict(), "newModel.pt")            
     y_pred_list = []
 
     model.eval()
